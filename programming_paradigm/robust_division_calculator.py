@@ -8,7 +8,8 @@ def safe_divide(numerator, denominator):
     except ZeroDivisionError:
         return f"Error: cannot divide by zero."
     except ValueError:
-        return"Error: enter numeric value only." 
+        return"Error: Please enter numeric values only." 
    
+
 
 
