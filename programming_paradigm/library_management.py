@@ -21,8 +21,8 @@ class Book:
         return not self._is_checked_out
 class Library:
     def __init__(self):
-        self._books=[]
-   
+        self._books = []   
+
     def add_book(self, book):
         self._books.append(book)
 
@@ -39,7 +39,7 @@ class Library:
             if book.title == title and not book.is_available():
                 book.return_book()
                 print(f"'{title}' has been returned.")
-            return
+                return
         print(f"Sorry, '{title}' was not checked out or not found.")
 
     def list_available_books(self):
@@ -49,9 +49,3 @@ class Library:
                 print(f"{book.title} by {book.author}")
         else:
             print("No books are currently available.")
-
-
-        
-
-      
-
