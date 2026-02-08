@@ -1,72 +1,94 @@
-from rest_framework import generics, filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework
-from .models import Book
-from .serializers import BookSerializer
+from rest_framework import generics, permissions
+from .models import Author, Book
+from .serializers import AuthorSerializer, BookSerializer
 
+# ============================================
+# BOOK VIEWS (Using EXACT class names from requirements)
+# ============================================
 
-class BookListView(generics.ListAPIView):
+class ListView(generics.ListAPIView):
     """
-    Returns a list of books with support for:
-    - Filtering by title, author, publication_year
-    - Searching by title and author name
-    - Ordering by title and publication_year
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    # DRF filtering, searching, ordering backends
-    filter_backends = [
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter
-    ]
-
-    # Filtering configuration
-    filterset_fields = ['title', 'author', 'publication_year']
-
-    # Search configuration
-    search_fields = ['title', 'author__name']
-
-    # Ordering configuration
-    ordering_fields = ['title', 'publication_year']
-    ordering = ['title']  # default ordering
-
-
-class BookDetailView(generics.RetrieveAPIView):
-    """
-    Retrieve a single book by ID.
-    This satisfies the ALX checker for the required DetailView.
+    ListView for retrieving all Book instances.
+    Provides read-only access to all books.
+    Accessible to both authenticated and unauthenticated users.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
 
-class BookCreateView(generics.CreateAPIView):
+class DetailView(generics.RetrieveAPIView):
     """
-    Only authenticated users can create books.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class BookUpdateView(generics.UpdateAPIView):
-    """
-    Only authenticated users can update books.
+    DetailView for retrieving a single Book instance by ID.
+    Provides read-only access to a specific book.
+    Accessible to both authenticated and unauthenticated users.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'pk'
 
 
-class BookDeleteView(generics.DestroyAPIView):
+class CreateView(generics.CreateAPIView):
     """
-    Only authenticated users can delete books.
+    CreateView for adding a new Book instance.
+    Includes custom validation from BookSerializer.
+    Restricted to authenticated users only.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        """Custom method called when creating a new book."""
+        serializer.save()
+
+
+class UpdateView(generics.UpdateAPIView):
+    """
+    UpdateView for modifying an existing Book instance.
+    Supports both PUT (full update) and PATCH (partial update) methods.
+    Restricted to authenticated users only.
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'pk'
+    
+    def perform_update(self, serializer):
+        """Custom method called when updating a book."""
+        serializer.save()
+
+
+class DeleteView(generics.DestroyAPIView):
+    """
+    DeleteView for removing a Book instance.
+    Restricted to authenticated users only.
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'pk'
+    
+    def perform_destroy(self, instance):
+        """Custom method called when deleting a book."""
+        instance.delete()
+
+
+# ============================================
+# AUTHOR VIEWS (Optional - keep existing if needed)
+# ============================================
+
+class AuthorListView(generics.ListAPIView):
+    """ListView for retrieving all Author instances."""
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class AuthorDetailView(generics.RetrieveAPIView):
+    """DetailView for retrieving a single Author instance."""
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'pk'
